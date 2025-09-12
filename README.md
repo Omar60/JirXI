@@ -1,5 +1,15 @@
-# JirX
-
+# Ji## Características
+- Canvas a pantalla completa con redimensionado automático.
+-## Solución de problemas
+- "No se pudo cargar el archivo del cluster…": 
+  - Asegúrate de estar sirviendo por HTTP (no abrir con `file://`).
+  - Verifica que la ruta del `fetch` apunte a `resources/sunflower_cluster.json`.
+- Pantalla negra o tarda mucho: el renderizado está en progreso; espera unos segundos/minutos según el equipo.
+- El canvas no llena la ventana: el tamaño se ajusta en `resizeCanvas()`; revisa que no haya errores en la consola.
+- **En móviles**: si el sitio se ve pequeño, verifica que el navegador no esté en modo "sitio de escritorio".rizado progresivo (animado) de miles de regiones para un efecto de "pintado" suave.
+- Mensaje de finalización cuando termina de dibujar.
+- Sin dependencias externas: puro HTML, CSS y JS.
+- **Optimizado para dispositivos móviles**: responsive design, soporte táctil, prevención de zoom accidental.
 Visualización animada en Canvas de un clúster de girasoles a partir de datos JSON. Al hacer clic en el botón, el script carga un archivo JSON con regiones (contornos y color) y las dibuja progresivamente en pantalla. Al terminar, muestra un mensaje de cierre.
 
 ## Características
@@ -71,6 +81,14 @@ Si mueves archivos o publicas en una subcarpeta, ajusta la ruta según la ubicac
 - El dataset es muy grande (muchas regiones y puntos). En equipos modestos, la animación completa puede tardar.
 - Mantén otras pestañas/cargas al mínimo mientras se dibuja.
 - Si necesitas un arranque más rápido, puedes aumentar `ANIMATION_SPEED` para procesar más regiones por frame.
+- **En dispositivos móviles**: el renderizado se optimiza automáticamente para mejor rendimiento y menor consumo de batería.
+
+## Compatibilidad móvil
+- **Viewport optimizado**: el diseño se adapta automáticamente a pantallas pequeñas.
+- **Botones táctiles**: tamaño mínimo de 44px para fácil interacción.
+- **Prevención de zoom**: evita zoom accidental al hacer doble tap.
+- **Texto responsivo**: fuentes que se ajustan al tamaño de pantalla.
+- **Rendimiento adaptativo**: velocidad de animación optimizada según el dispositivo.
 
 ## Solución de problemas
 - “No se pudo cargar el archivo del cluster…”: 

@@ -2,7 +2,10 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="theme-color" content="#1a1a1a" />
     <title>JirX</title>
 
     <link rel="stylesheet" href="styles.css" />
@@ -14,7 +17,7 @@
     </h1>
 
     <div class="controls">
-      <button onclick="loadCluster()" id="load-btn">
+      <button onclick="loadCluster()" ontouchstart="" id="load-btn">
         ¡Hey... aquí, da click aquí!
       </button>
     </div>
@@ -51,6 +54,23 @@
 
       // Redimensionar cuando cambie el tamaño de la ventana
       window.addEventListener("resize", resizeCanvas);
+
+      // Prevenir zoom en dispositivos móviles
+      document.addEventListener('touchstart', function(event) {
+        if (event.touches.length > 1) {
+          event.preventDefault();
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchend', function(event) {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+          event.preventDefault();
+        }
+        lastTouchEnd = now;
+      }, false);
+
+      let lastTouchEnd = 0;
 
       function updateStatus(message) {
         document.getElementById("status").textContent = message;
@@ -112,10 +132,15 @@
         reader.readAsText(file);
       }
 
-      // Variables de animación (configuraciones fijas)
+      // Variables de animación (configuraciones adaptativas)
       let animationId = null;
       let isAnimating = false;
-      const ANIMATION_SPEED = 1; // Velocidad mínima: 1 región por frame
+      
+      // Detectar dispositivo móvil para optimizar rendimiento
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                       window.innerWidth <= 768;
+      
+      const ANIMATION_SPEED = isMobile ? 3 : 1; // Más rápido en móviles para mejor rendimiento
       const QUALITY_LIMIT = -1; // Calidad máxima: todas las regiones
 
       async function drawFromJson(regions) {
