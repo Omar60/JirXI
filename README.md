@@ -1,22 +1,14 @@
-# Ji## Características
-- Canvas a pantalla completa con redimensionado automático.
--## Solución de problemas
-- "No se pudo cargar el archivo del cluster…": 
-  - Asegúrate de estar sirviendo por HTTP (no abrir con `file://`).
-  - Verifica que la ruta del `fetch` apunte a `resources/sunflower_cluster.json`.
-- Pantalla negra o tarda mucho: el renderizado está en progreso; espera unos segundos/minutos según el equipo.
-- El canvas no llena la ventana: el tamaño se ajusta en `resizeCanvas()`; revisa que no haya errores en la consola.
-- **En móviles**: si el sitio se ve pequeño, verifica que el navegador no esté en modo "sitio de escritorio".rizado progresivo (animado) de miles de regiones para un efecto de "pintado" suave.
-- Mensaje de finalización cuando termina de dibujar.
-- Sin dependencias externas: puro HTML, CSS y JS.
-- **Optimizado para dispositivos móviles**: responsive design, soporte táctil, prevención de zoom accidental.
+# JirX
+
 Visualización animada en Canvas de un clúster de girasoles a partir de datos JSON. Al hacer clic en el botón, el script carga un archivo JSON con regiones (contornos y color) y las dibuja progresivamente en pantalla. Al terminar, muestra un mensaje de cierre.
 
 ## Características
 - Canvas a pantalla completa con redimensionado automático.
-- Renderizado progresivo (animado) de miles de regiones para un efecto de “pintado” suave.
+- Renderizado progresivo (animado) de miles de regiones para un efecto de "pintado" suave.
 - Mensaje de finalización cuando termina de dibujar.
 - Sin dependencias externas: puro HTML, CSS y JS.
+- **Optimizado para dispositivos móviles**: responsive design, soporte táctil, prevención de zoom accidental.
+- El botón principal ahora muestra un subtítulo: "(Puede tardar unos segundos)" en una fuente más pequeña, para informar sobre la posible espera.
 
 ## Requisitos
 - Un navegador moderno (Chrome, Edge, Firefox...).
@@ -39,8 +31,8 @@ python -m http.server 5500
 ```
 
 Opción B — VS Code (extensión Live Server):
-- Instala la extensión “Live Server”.
-- Abre `index.html` y haz clic en “Go Live”.
+- Instala la extensión "Live Server".
+- Abre `index.html` y haz clic en "Go Live".
 
 Opción C — Node.js http-server (si tienes Node):
 ```powershell
@@ -56,7 +48,7 @@ Luego visita `http://localhost:5500/` en tu navegador.
 
 ## Uso
 1. Abre la página servida por HTTP (ver pasos anteriores).
-2. Pulsa el botón “¡Hey... aquí, da click aquí!” para iniciar la carga del dataset y el dibujo animado.
+2. Pulsa el botón "¡Hey... aquí, da click aquí!" para iniciar la carga del dataset y el dibujo animado. Debajo del texto principal del botón verás el mensaje "(Puede tardar unos segundos)" en una fuente más pequeña.
 3. Espera a que el proceso termine; se mostrará un mensaje de finalización.
 
 Notas importantes:
@@ -91,11 +83,12 @@ Si mueves archivos o publicas en una subcarpeta, ajusta la ruta según la ubicac
 - **Rendimiento adaptativo**: velocidad de animación optimizada según el dispositivo.
 
 ## Solución de problemas
-- “No se pudo cargar el archivo del cluster…”: 
+- "No se pudo cargar el archivo del cluster…": 
   - Asegúrate de estar sirviendo por HTTP (no abrir con `file://`).
   - Verifica que la ruta del `fetch` apunte a `resources/sunflower_cluster.json`.
 - Pantalla negra o tarda mucho: el renderizado está en progreso; espera unos segundos/minutos según el equipo.
 - El canvas no llena la ventana: el tamaño se ajusta en `resizeCanvas()`; revisa que no haya errores en la consola.
+- **En móviles**: si el sitio se ve pequeño, verifica que el navegador no esté en modo "sitio de escritorio".
 
 ## Despliegue
 - Puedes publicar el sitio en GitHub Pages, Netlify, Vercel, etc. Solo asegúrate de mantener la estructura de carpetas (`index.html` en la raíz y `resources/` junto a él), o ajusta la ruta en `fetch` si cambia.
