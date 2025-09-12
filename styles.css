@@ -22,7 +22,7 @@ body {
 h1 {
   color: #4caf50;
   margin: 10px 0;
-  font-size: clamp(14px, 4vw, 19px);
+  font-size: clamp(16px, 4vw, 19px);
   position: absolute;
   top: 10px;
   left: 50%;
@@ -103,7 +103,7 @@ button {
   padding: clamp(12px, 3vw, 16px) clamp(16px, 4vw, 20px);
   border-radius: 8px;
   cursor: pointer;
-  font-size: clamp(14px, 3.5vw, 16px);
+  font-size: clamp(12px, 3.5vw, 14px);
   font-weight: bold;
   transition: all 0.3s ease;
   min-height: 44px; /* Tamaño mínimo táctil recomendado */
