@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JirX</title>
+
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <h1>
+      Tal vez no sean reales, pero siguen siendo lindas... pero no tanto como tu
+      sonrisa :3 <3
+    </h1>
+
+    <div class="controls">
+      <button onclick="loadCluster()" id="load-btn">
+        ¡Hey... aquí, da click aquí!
+      </button>
+    </div>
+
+    <div id="canvas-container">
+      <canvas id="drawingCanvas" width="1000" height="800"></canvas>
+    </div>
+
+    <div id="completion-message">Te quiero mucho, Tamara 💖</div>
+
+    <script>
+      let canvas = document.getElementById("drawingCanvas");
+      let ctx = canvas.getContext("2d");
+      let currentData = null;
+      let isRendering = false;
+
+      // Función para redimensionar el canvas al tamaño de la ventana
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Reconfigurar el fondo después de redimensionar
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Si hay datos cargados, redibujar
+        if (currentData && !isRendering) {
+          drawFromJson(currentData);
+        }
+      }
+
+      // Configurar canvas inicial
+      resizeCanvas();
+
+      // Redimensionar cuando cambie el tamaño de la ventana
+      window.addEventListener("resize", resizeCanvas);
+
+      function updateStatus(message) {
+        document.getElementById("status").textContent = message;
+      }
+
+      function clearCanvas() {
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function setRenderingState(rendering) {
+        isRendering = rendering;
+        document.getElementById("load-btn").disabled = rendering;
+      }
+
+      function showCompletionMessage() {
+        const message = document.getElementById("completion-message");
+        message.classList.add("show");
+      }
+
+      function hideCompletionMessage() {
+        const message = document.getElementById("completion-message");
+        message.classList.remove("show");
+      }
+
+      async function loadCluster() {
+        try {
+          const response = await fetch(`resources/sunflower_cluster.json`);
+          if (!response.ok) {
+            throw new Error("No se pudo cargar el archivo");
+          }
+          const data = await response.json();
+          currentData = data;
+
+          await drawFromJson(data);
+        } catch (error) {
+          console.error("Error:", error);
+          alert(
+            "No se pudo cargar el archivo del cluster. Asegúrate de que esté en la carpeta resources/"
+          );
+        }
+      }
+
+      async function loadCustomFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function (e) {
+          try {
+            const data = JSON.parse(e.target.result);
+            currentData = data;
+            await drawFromJson(data);
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Error al procesar el archivo JSON");
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // Variables de animación (configuraciones fijas)
+      let animationId = null;
+      let isAnimating = false;
+      const ANIMATION_SPEED = 1; // Velocidad mínima: 1 región por frame
+      const QUALITY_LIMIT = -1; // Calidad máxima: todas las regiones
+
+      async function drawFromJson(regions) {
+        // Limpiar canvas y ocultar mensaje de finalización
+        clearCanvas();
+        hideCompletionMessage();
+        setRenderingState(true);
+
+        // Usar todas las regiones (calidad máxima)
+        const limitedRegions = regions; // Sin limitación
+
+        // Calcular límites de manera más eficiente
+        let minX = Infinity,
+          maxX = -Infinity;
+        let minY = Infinity,
+          maxY = -Infinity;
+
+        // Procesar en lotes para evitar desbordamiento de pila
+        const batchSize = limitedRegions.length > 5000 ? 25 : 50; // Lotes más pequeños para datasets grandes
+        for (let i = 0; i < limitedRegions.length; i += batchSize) {
+          const batch = limitedRegions.slice(i, i + batchSize);
+
+          for (const region of batch) {
+            for (const point of region.contour) {
+              if (point[0] < minX) minX = point[0];
+              if (point[0] > maxX) maxX = point[0];
+              if (point[1] < minY) minY = point[1];
+              if (point[1] > maxY) maxY = point[1];
+            }
+          }
+
+          // Permitir que el navegador respire
+          if (i % (batchSize * 10) === 0) {
+            await new Promise((resolve) => setTimeout(resolve, 1));
+          }
+        }
+
+        if (minX === Infinity) {
+          setRenderingState(false);
+          return;
+        }
+
+        // Calcular escala y centro igual que en Python
+        const width = maxX - minX;
+        const height = maxY - minY;
+        const scale = Math.min(600 / width, 600 / height);
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        // Configurar anti-aliasing para mejor calidad
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+
+        // Siempre usar animación progresiva
+        await drawAnimated(limitedRegions, scale, centerX, centerY);
+      }
+
+      async function drawAnimated(regions, scale, centerX, centerY) {
+        let currentIndex = 0;
+
+        function drawBatch() {
+          if (currentIndex >= regions.length) {
+            setRenderingState(false);
+            showCompletionMessage();
+            return;
+          }
+
+          // Dibujar con velocidad mínima para máximo detalle
+          const endIndex = Math.min(
+            currentIndex + ANIMATION_SPEED,
+            regions.length
+          );
+
+          for (let i = currentIndex; i < endIndex; i++) {
+            const region = regions[i];
+
+            // Configurar color
+            const r = Math.max(0, Math.min(255, Math.round(region.color[0])));
+            const g = Math.max(0, Math.min(255, Math.round(region.color[1])));
+            const b = Math.max(0, Math.min(255, Math.round(region.color[2])));
+            const color = `rgb(${r}, ${g}, ${b})`;
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+
+            // Dibujar contorno
+            const points = region.contour;
+            if (points.length === 0) continue;
+
+            // Primer punto
+            let x = (points[0][0] - centerX) * scale + canvas.width / 2;
+            let y = (centerY - points[0][1]) * scale + canvas.height / 2;
+            ctx.moveTo(x, y);
+
+            // Resto de puntos
+            for (let k = 1; k < points.length; k++) {
+              x = (points[k][0] - centerX) * scale + canvas.width / 2;
+              y = (centerY - points[k][1]) * scale + canvas.height / 2;
+              ctx.lineTo(x, y);
+            }
+
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          currentIndex = endIndex;
+
+          // Continuar con la siguiente tanda
+          animationId = requestAnimationFrame(drawBatch);
+        }
+
+        // Iniciar animación
+        isAnimating = true;
+        drawBatch();
+      }
+
+      async function drawImmediate(
+        regions,
+        scale,
+        centerX,
+        centerY,
+        batchSize
+      ) {
+        // Dibujar regiones en lotes asíncronos (método original)
+        for (let i = 0; i < regions.length; i += batchSize) {
+          const batch = regions.slice(i, i + batchSize);
+
+          for (let j = 0; j < batch.length; j++) {
+            const region = batch[j];
+
+            // Configurar color - exactamente como Python: int(region['color'][0])
+            const r = Math.max(0, Math.min(255, Math.round(region.color[0])));
+            const g = Math.max(0, Math.min(255, Math.round(region.color[1])));
+            const b = Math.max(0, Math.min(255, Math.round(region.color[2])));
+            const color = `rgb(${r}, ${g}, ${b})`;
+
+            // Debug: mostrar algunos colores para verificar
+            if (j === 0 && i < 10) {
+              console.log(
+                `Región ${i}: color original [${region.color[0]}, ${region.color[1]}, ${region.color[2]}] -> RGB(${r}, ${g}, ${b})`
+              );
+            }
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+
+            // Dibujar contorno completo (sin limitar puntos para mantener detalle)
+            const points = region.contour;
+            if (points.length === 0) continue;
+
+            // Primer punto - calcular igual que en Python
+            let x = (points[0][0] - centerX) * scale + canvas.width / 2;
+            let y = (centerY - points[0][1]) * scale + canvas.height / 2; // Nota: Y invertida como en Python
+            ctx.moveTo(x, y);
+
+            // Resto de puntos - usar todos para mantener el detalle
+            for (let k = 1; k < points.length; k++) {
+              x = (points[k][0] - centerX) * scale + canvas.width / 2;
+              y = (centerY - points[k][1]) * scale + canvas.height / 2; // Y invertida
+              ctx.lineTo(x, y);
+            }
+
+            // Cerrar forma - volver al primer punto como en Python
+            x = (points[0][0] - centerX) * scale + canvas.width / 2;
+            y = (centerY - points[0][1]) * scale + canvas.height / 2;
+            ctx.lineTo(x, y);
+
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          // Actualizar progreso menos frecuentemente para mejor rendimiento
+          if (i % (batchSize * 5) === 0 || i + batchSize >= regions.length) {
+            const progress = Math.round(
+              ((i + batchSize) / regions.length) * 100
+            );
+            updateStatus(
+              `Dibujando... ${Math.min(progress, 100)}% (${Math.min(
+                i + batchSize,
+                regions.length
+              )}/${regions.length})`
+            );
+
+            // Pausa más corta para mejor fluidez
+            await new Promise((resolve) => setTimeout(resolve, 5));
+          }
+        }
+
+        setRenderingState(false);
+        console.log(
+          `Renderizado completado: ${regions.length} regiones procesadas`
+        );
+      }
+    </script>
+  </body>
+</html>
