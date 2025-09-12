@@ -106,10 +106,26 @@ button {
   font-size: clamp(14px, 3.5vw, 16px);
   font-weight: bold;
   transition: all 0.3s ease;
-  white-space: nowrap;
   min-height: 44px; /* Tamaño mínimo táctil recomendado */
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  /* Permitir múltiples líneas y centrar contenido */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.1;
+  white-space: normal;
+}
+
+/* Subtítulo del botón */
+button .btn-subtext {
+  font-size: clamp(11px, 2.6vw, 13px);
+  font-weight: 400;
+  opacity: 0.9;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 button:hover, button:focus {
