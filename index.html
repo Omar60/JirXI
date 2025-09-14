@@ -2,9 +2,15 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
     <meta name="theme-color" content="#1a1a1a" />
     <title>JirX</title>
 
@@ -57,19 +63,27 @@
       window.addEventListener("resize", resizeCanvas);
 
       // Prevenir zoom en dispositivos móviles
-      document.addEventListener('touchstart', function(event) {
-        if (event.touches.length > 1) {
-          event.preventDefault();
-        }
-      }, { passive: false });
+      document.addEventListener(
+        "touchstart",
+        function (event) {
+          if (event.touches.length > 1) {
+            event.preventDefault();
+          }
+        },
+        { passive: false }
+      );
 
-      document.addEventListener('touchend', function(event) {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-          event.preventDefault();
-        }
-        lastTouchEnd = now;
-      }, false);
+      document.addEventListener(
+        "touchend",
+        function (event) {
+          const now = new Date().getTime();
+          if (now - lastTouchEnd <= 300) {
+            event.preventDefault();
+          }
+          lastTouchEnd = now;
+        },
+        false
+      );
 
       let lastTouchEnd = 0;
 
@@ -136,11 +150,13 @@
       // Variables de animación (configuraciones adaptativas)
       let animationId = null;
       let isAnimating = false;
-      
+
       // Detectar dispositivo móvil para optimizar rendimiento
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                       window.innerWidth <= 768;
-      
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        ) || window.innerWidth <= 768;
+
       const ANIMATION_SPEED = isMobile ? 3 : 1; // Más rápido en móviles para mejor rendimiento
       const QUALITY_LIMIT = -1; // Calidad máxima: todas las regiones
 
@@ -336,5 +352,7 @@
         );
       }
     </script>
+    <!-- Vercel Analytics (Gratuito) -->
+    <script defer src="/_vercel/insights/script.js"></script>
   </body>
 </html>
